@@ -35,7 +35,7 @@ optiondx_data/
 └── 2023/
 ```
 
-Each year folder should contain the monthly `.txt` files downloaded from OptionDX (Do not forget to unzip the files before running).
+Each year folder should contain the monthly `.txt` files downloaded from OptionDX (do not forget to unzip the folders before running).
 
 ### Before running
 
