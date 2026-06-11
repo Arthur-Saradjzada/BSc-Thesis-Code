@@ -265,6 +265,6 @@ The script creates a CSV file:
 volatility_surface_panel.csv
 ```
 
-This CSV file is used as input for later programs.
+This CSV file is used as input for later programs. #WILL PROBABLY BE ADJUSTED TO SQL 
 
 The script also shows a 3D plot of the implied volatility surface for the selected `PLOT_DAY`.
