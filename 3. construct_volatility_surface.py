@@ -12,8 +12,7 @@ The script:
 5. Saves the balanced surface panel as a CSV file.
 6. Shows the implied volatility surface for one selected trading day.
 
-Distance metric used to select representative contracts:
-    d = 10 * (Delta - Delta_mid)^2 + (DTE - DTE_mid)^2
+
 
 Input:
     spx_options_eod_clean
@@ -23,7 +22,7 @@ Before running:
     2. Check TABLE_NAME.
     3. Check START_DATE and END_DATE.
     4. Check PLOT_DAY.
-    5. Check OUTPUT_CSV. This must be the full path where the CSV file should be saved.
+    5. Check OUTPUT_CSV. This must be the full path where the CSV file should be saved. This file will be used in the following programs
 
 Example OUTPUT_CSV:
     OUTPUT_CSV = r"C:\\Users\\vcsa0\\Downloads\\volatility_surface_panel.csv"
@@ -42,7 +41,7 @@ from sqlalchemy import create_engine
 # Settings
 # ---------------------------------------------------------------------
 
-CONNECTION_STRING = "mysql+pymysql://root:PANArthur123!@localhost/spx_data"
+CONNECTION_STRING = "mysql+pymysql://root:PASSWORD@localhost/spx_data"
 TABLE_NAME = "spx_options_eod_clean"
 
 START_DATE = "2010-01-01"
@@ -54,10 +53,10 @@ MIN_IV = 0.05
 MAX_IV = 0.70
 MIN_PRICE = 0.05
 
-PLOT_DAY = "2010-01-01"
+PLOT_DAY = "2010-06-04"
 
 # Full path where the balanced volatility-surface panel will be saved.
-OUTPUT_CSV = r"C:\Users\vcsa0\Downloads\volatility_surface_panel.csv"
+OUTPUT_CSV = r"C:PATH HERE volatility_surface_panel.csv" # <-- UPDATE THIS TO YOUR DESIRED PATH
 
 engine = create_engine(CONNECTION_STRING)
 
