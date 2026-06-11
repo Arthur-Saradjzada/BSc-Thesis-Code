@@ -2,7 +2,7 @@
 optiondx_data_to_sql.py
 
 Purpose:
-1. Search all subfolders inside C:/Users/vcsa0/Desktop/optiondx_spx.
+1. Search all subfolders inside C:/Your/Path/Desktop/optiondx_spx.
 2. Read every OptionDX .txt file.
 3. Convert the data to correct data types.
 4. Save everything directly into MySQL table: spx_options_eod_clean.
