@@ -268,3 +268,70 @@ volatility_surface_panel.csv
 This CSV file is used as input for later programs. #WILL PROBABLY BE ADJUSTED TO SQL 
 
 The script also shows a 3D plot of the implied volatility surface for the selected `PLOT_DAY`.
+
+## 4. Import OptionDX VIX data into MySQL
+
+File: `vix_data_to_sql.py`
+
+This script imports VIX End-of-Day option chain data from OptionDX into a MySQL database.
+
+The script searches all subfolders inside the VIX data folder, reads every `.txt` file, cleans the data types, and saves the result into a MySQL table.
+
+### Input
+
+The raw VIX `.txt` files should be stored in a local folder, for example:
+
+```text
+VIX_data/
+├── 2010/
+├── 2011/
+├── ...
+└── 2023/
+```
+
+### Before running
+
+Make sure:
+
+1. MySQL Server is installed and running.
+2. The MySQL database exists, for example `spx_data`.
+3. `CONNECTION_STRING` is correct.
+4. `ROOT_FOLDER` points to the folder containing the VIX `.txt` files.
+
+Main settings to check:
+
+```python
+CONNECTION_STRING = "mysql+pymysql://root:PASSWORD@localhost/spx_data"
+ROOT_FOLDER = r"C:\Here\Your\Path\VIX_data"
+TABLE_NAME = "vix_eod"
+```
+
+### Python packages
+
+Install the required Python packages:
+
+```bash
+pip install pandas numpy sqlalchemy pymysql
+```
+
+### Run the script
+
+```bash
+python vix_data_to_sql.py
+```
+
+### Output
+
+The script creates and fills the following MySQL table:
+
+```text
+vix_eod
+```
+
+At the end, the script prints a final check showing:
+
+- Total number of rows
+- First quote date
+- Last quote date
+- Number of unique quote dates
+- SQL column types
