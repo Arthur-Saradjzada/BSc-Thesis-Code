@@ -193,11 +193,11 @@ LaTeX requirements:
 \usepackage{multirow}
 ```
 
-## 3. Construct balanced SPX volatility surface
+## 3. Construct SPX volatility surface
 
 File: `construct_volatility_surface.py`
 
-This script constructs a balanced implied volatility surface from the cleaned SPX option data.
+This script constructs an implied volatility surface from the cleaned SPX option data.
 
 It uses the MySQL table created by the import script:
 
