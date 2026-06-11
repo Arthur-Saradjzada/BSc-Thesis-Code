@@ -1,5 +1,5 @@
 """
-optiondx_data_to_sql.py
+spx_data_to_sql.py
 
 Purpose:
 1. Search all subfolders inside C:/Your/Path/Desktop/optiondx_spx.
