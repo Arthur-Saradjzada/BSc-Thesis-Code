@@ -335,3 +335,93 @@ At the end, the script prints a final check showing:
 - Last quote date
 - Number of unique quote dates
 - SQL column types
+
+## 5. Plot SPX volatility time series and slopes
+
+File: `volatility_timeseries_and_slopes.py`
+
+This script creates descriptive time-series plots from the balanced SPX implied-volatility surface panel.
+
+It uses the CSV file created by:
+
+```text
+construct_volatility_surface.py
+```
+
+It also uses the VIX table created by:
+
+```text
+vix_data_to_sql.py
+```
+
+### What the script does
+
+The script creates two figures:
+
+1. Volatility time series
+   - Average implied volatility across all 24 surface buckets
+   - VIX overlay from the MySQL table `vix_eod`
+   - Implied-volatility time series for all 24 buckets
+
+2. Surface slope time series
+   - Smile slope by maturity bucket: `IV(DOTM put) - IV(DOTM call)`
+   - Term-structure slope by moneyness bucket: `IV(180-360d) - IV(7-45d)`
+
+### Before running
+
+Make sure:
+
+1. The file `volatility_surface_panel.csv` already exists.
+2. The MySQL table `vix_eod` already exists.
+3. `CONNECTION_STRING` is correct.
+4. `SURFACE_FILE` points to the CSV file created by `construct_volatility_surface.py`.
+5. `START_DATE` and `END_DATE` are correct.
+6. `SAVE_FIGURES` is set to `True` if you want to save the figures.
+
+Main settings to check:
+
+```python
+CONNECTION_STRING = "mysql+pymysql://root:PASSWORD@localhost/spx_data"
+SURFACE_FILE = Path(r"C:\Here\Your\Path\volatility_surface_panel.csv")
+
+VIX_TABLE_NAME = "vix_eod"
+START_DATE = "2010-01-01"
+END_DATE = "2022-01-01"
+
+SAVE_FIGURES = False
+```
+
+### Python packages
+
+Install the required Python packages:
+
+```bash
+pip install numpy pandas matplotlib sqlalchemy pymysql
+```
+
+### Run the script
+
+```bash
+python volatility_timeseries_and_slopes.py
+```
+
+### Output
+
+The script displays:
+
+```text
+Volatility time-series plot
+Volatility smile slope plot
+Volatility term-structure slope plot
+```
+
+If `SAVE_FIGURES = True`, the script saves:
+
+```text
+figure2_volatility_timeseries.pdf
+figure2_volatility_timeseries.png
+figure3_volatility_slopes.pdf
+figure3_volatility_slopes.png
+```
+
+Note: the VIX series is used only as a benchmark overlay.
