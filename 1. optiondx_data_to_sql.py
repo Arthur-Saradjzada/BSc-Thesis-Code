@@ -17,7 +17,8 @@ Run:
     optiondx_data_to_sql.py
 
 
-ACTIONS BEFORE RUNNING:
+Before running:
+
 1. Make sure CONNECTION_STRING is correct for your MySQL setup.
 2. Make sure ROOT_FOLDER points to the correct folder containing the .txt files.
 3. Make sure the MySQL database specified in CONNECTION_STRING exists.
