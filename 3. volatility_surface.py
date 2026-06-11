@@ -1,5 +1,5 @@
 """
-construct_volatility_surface.py
+volatility_surface.py
 
 Purpose:
 Construct a balanced 24-bucket implied volatility surface from filtered SPX option data.
