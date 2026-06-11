@@ -1,15 +1,15 @@
 """
-summary_statistics_spx.py
+descriptive_statistics_spx.py
 
 Purpose:
-Create a LaTeX summary-statistics table for filtered SPX option data.
+Create a LaTeX descriptive-statistics table for filtered SPX option data.
 
 The script:
 1. Reads option data from a MySQL table.
 2. Converts the wide call/put format into option-level rows inside SQL.
 3. Applies the selected filtering rules.
 4. Assigns maturity and delta-based moneyness buckets.
-5. Computes summary statistics by bucket.
+5. Computes descriptive statistics by bucket.
 6. Prints and saves a LaTeX table.
 
 Before running:
@@ -35,7 +35,7 @@ Before running:
        OUTPUT_TEX_FILE
 
 Run:
-    python summary_statistics_spx.py
+    python descriptive_statistics_spx.py
 
 LaTeX requirements:
     \\usepackage{booktabs}
@@ -71,7 +71,7 @@ MAX_IV = 0.70
 
 MIN_PRICE = 0.05
 
-OUTPUT_TEX_FILE = Path("summary_statistics_spx.tex")
+OUTPUT_TEX_FILE = Path("descriptive_statistics_spx.tex")
 
 engine = create_engine(CONNECTION_STRING)
 
@@ -108,13 +108,13 @@ VARIABLES = [
 # 3. SQL query
 # ---------------------------------------------------------------------
 
-def build_summary_query() -> str:
+def build_descriptive_query() -> str:
     """
     Build SQL query that:
     - reshapes calls and puts into option-level rows;
     - filters the option observations;
     - assigns buckets;
-    - computes summary statistics;
+    - computes descriptive statistics;
     - computes average daily trading-volume shares.
     """
 
@@ -302,15 +302,15 @@ def build_summary_query() -> str:
 
 
 # ---------------------------------------------------------------------
-# 4. Load summary statistics
+# 4. Load descriptive statistics
 # ---------------------------------------------------------------------
 
-def load_summary_statistics() -> pd.DataFrame:
+def load_descriptive_statistics() -> pd.DataFrame:
     """
     Run the SQL query and return the result as a pandas DataFrame.
     """
 
-    query = build_summary_query()
+    query = build_descriptive_query()
     df = pd.read_sql(query, engine)
 
     df["MONEYNESS_BUCKET"] = pd.Categorical(
@@ -373,8 +373,8 @@ def build_latex_table(df: pd.DataFrame) -> str:
 
     lines.append(r"\begin{table}[htbp]")
     lines.append(r"\centering")
-    lines.append(r"\caption{Summary statistics}")
-    lines.append(r"\label{tab:summary_statistics}")
+    lines.append(r"\caption{Descriptive statistics}")
+    lines.append(r"\label{tab:descriptive_statistics}")
     lines.append(r"\small")
     lines.append(r"\begin{tabular}{llrrrrrrrr}")
     lines.append(r"\toprule")
@@ -427,7 +427,7 @@ def build_latex_table(df: pd.DataFrame) -> str:
     lines.append(r"\smallskip")
     lines.append(
         r"\footnotesize "
-        r"\textit{Note}: The table reports summary statistics for filtered option observations. "
+        r"\textit{Note}: The table reports descriptive statistics for filtered option observations. "
         r"Implied volatility (IV), days to maturity (DTM), moneyness $(K/S)$, and option "
         r"delta $(\Delta)$ are reported with means and standard deviations. "
         r"Trading Vol (\%) is the average daily percentage share of total filtered option "
@@ -453,8 +453,8 @@ def print_diagnostics(df: pd.DataFrame) -> None:
     total_obs = int(df["n_obs"].sum())
     available_cells = len(df)
 
-    print("\nSummary-statistics dataset")
-    print("--------------------------")
+    print("\nDescriptive-statistics dataset")
+    print("------------------------------")
     print(f"Available maturity-moneyness cells: {available_cells}")
     print(f"Total filtered observations:        {total_obs:,}")
 
@@ -477,9 +477,9 @@ def main() -> None:
             "Please set MYSQL_CONNECTION_STRING or replace YOUR_PASSWORD in CONNECTION_STRING."
         )
 
-    print("Computing summary statistics...")
+    print("Computing descriptive statistics...")
 
-    stats = load_summary_statistics()
+    stats = load_descriptive_statistics()
 
     print_diagnostics(stats)
 
