@@ -192,3 +192,79 @@ LaTeX requirements:
 \usepackage{booktabs}
 \usepackage{multirow}
 ```
+
+## 3. Construct balanced SPX volatility surface
+
+File: `construct_volatility_surface.py`
+
+This script constructs a balanced implied volatility surface from the cleaned SPX option data.
+
+It uses the MySQL table created by the import script:
+
+```text
+spx_options_eod_clean
+```
+
+The script filters SPX call and put options, assigns each option to a delta-based moneyness bucket and a maturity bucket, and selects one representative contract for each bucket on each trading day.
+
+### What the script does
+
+The script:
+
+1. Reads filtered SPX option data from MySQL.
+2. Keeps options based on date, maturity, implied volatility, delta, and price filters.
+3. Creates 6 moneyness buckets and 4 maturity buckets.
+4. Builds a balanced 24-bucket volatility surface for each trading day.
+5. Saves the volatility surface panel as a CSV file.
+6. Plots the implied volatility surface for one selected trading day.
+
+### Before running
+
+Make sure:
+
+1. MySQL Server is installed and running.
+2. The table `spx_options_eod_clean` already exists.
+3. `CONNECTION_STRING` is correct.
+4. `TABLE_NAME` is correct.
+5. `START_DATE` and `END_DATE` are correct.
+6. `PLOT_DAY` is set to the trading day you want to visualize.
+7. `OUTPUT_CSV` is updated to the full path where the CSV file should be saved.
+
+Main settings to check:
+
+```python
+CONNECTION_STRING = "mysql+pymysql://root:PASSWORD@localhost/spx_data"
+TABLE_NAME = "spx_options_eod_clean"
+
+START_DATE = "2010-01-01"
+END_DATE = "2022-01-01"
+
+PLOT_DAY = "2010-06-04"
+OUTPUT_CSV = r"C:\Your\Path\volatility_surface_panel.csv"
+```
+
+### Python packages
+
+Install the required Python packages:
+
+```bash
+pip install numpy pandas matplotlib sqlalchemy pymysql
+```
+
+### Run the script
+
+```bash
+python construct_volatility_surface.py
+```
+
+### Output
+
+The script creates a CSV file:
+
+```text
+volatility_surface_panel.csv
+```
+
+This CSV file is used as input for later programs.
+
+The script also shows a 3D plot of the implied volatility surface for the selected `PLOT_DAY`.
