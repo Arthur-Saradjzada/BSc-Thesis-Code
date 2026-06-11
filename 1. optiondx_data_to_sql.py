@@ -38,7 +38,7 @@ from sqlalchemy.dialects.mysql import DOUBLE
 
 CONNECTION_STRING = "mysql+pymysql://root:PASSWORD@localhost/DATABASE_NAME" # Change this to your actual connection string
 
-ROOT_FOLDER = r"C:\Users\vcsa0\Desktop\optiondx_spx" # Change this to your actual folder path containing the .txt files
+ROOT_FOLDER = r"C:\Your\Path\Here\optiondx_spx" # Change this to your actual folder path containing the .txt files
 TABLE_NAME = "spx_options_eod_clean"
 
 CHUNKSIZE = 100_000
