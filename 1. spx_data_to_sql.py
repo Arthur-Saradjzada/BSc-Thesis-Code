@@ -21,6 +21,8 @@ Before running:
 1. Make sure CONNECTION_STRING is correct for your MySQL setup.
 2. Make sure ROOT_FOLDER points to the correct folder containing the .txt files.
 3. Make sure the MySQL database specified in CONNECTION_STRING exists.
+
+Output: Expected to obtain 15,556,477 rows.
 """
 
 import os
