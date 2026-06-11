@@ -68,11 +68,11 @@ END_DATE = "2022-01-01"
 
 SAVE_FIGURES = False
 
-FIGURE2_PDF = "figure2_volatility_timeseries.pdf"
-FIGURE2_PNG = "figure2_volatility_timeseries.png"
+FIGURE2_PDF = "figure1_volatility_timeseries.pdf"
+FIGURE2_PNG = "figure1_volatility_timeseries.png"
 
-FIGURE3_PDF = "figure3_volatility_slopes.pdf"
-FIGURE3_PNG = "figure3_volatility_slopes.png"
+FIGURE3_PDF = "figure2_volatility_slopes.pdf"
+FIGURE3_PNG = "figure2_volatility_slopes.png"
 
 
 # ---------------------------------------------------------------------
