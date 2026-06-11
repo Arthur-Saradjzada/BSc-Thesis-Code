@@ -8,7 +8,7 @@ Purpose:
 4. Save everything directly into MySQL table: spx_options_eod_clean.
 
 Input folder:
-    C:\\Users\\vcsa0\\Desktop\\optiondx_spx
+    C:\\Users\\Your\\Path\\optiondx_spx
 
 Output table:
     spx_options_eod_clean
