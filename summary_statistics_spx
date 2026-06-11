@@ -5,7 +5,7 @@ Purpose:
 Create a LaTeX summary-statistics table for filtered SPX option data.
 
 The script:
-1. Reads option data from a typed MySQL table.
+1. Reads option data from a MySQL table.
 2. Converts the wide call/put format into option-level rows inside SQL.
 3. Applies the selected filtering rules.
 4. Assigns maturity and delta-based moneyness buckets.
@@ -13,7 +13,7 @@ The script:
 6. Prints and saves a LaTeX table.
 
 Before running:
-1. Make sure the MySQL table exists and has the required OptionDX columns.
+1. Make sure the MySQL table exists.
 2. Install dependencies:
        pip install pandas sqlalchemy pymysql
 3. Set your database connection string as an environment variable.
@@ -21,7 +21,7 @@ Before running:
    PowerShell example:
        $env:MYSQL_CONNECTION_STRING="mysql+pymysql://root:YOUR_PASSWORD@localhost/spx_data"
 
-   Or edit CONNECTION_STRING below manually for local testing only.
+   Or edit CONNECTION_STRING below manually.
 
 4. Check these settings:
        TABLE_NAME
