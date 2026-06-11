@@ -42,7 +42,7 @@ Each year folder should contain the monthly `.txt` files downloaded from OptionD
 Make sure the following steps are completed:
 
 1. MySQL Server is installed and running.
-2. MySQL Workbench is installed if you want to create and inspect the database using a graphical interface.
+2. MySQL Workbench is installed.
 3. The MySQL database exists.
 4. `CONNECTION_STRING` is updated for your MySQL username, password, host, and database name.
 5. `ROOT_FOLDER` points to the folder containing the downloaded OptionDX `.txt` files.
