@@ -61,7 +61,7 @@ CONNECTION_STRING = os.getenv(
 TABLE_NAME = "spx_options_eod_clean"
 
 START_DATE = "2010-01-01"
-END_DATE = "2022-01-01"  # exclusive
+END_DATE = "2022-01-01" 
 
 MIN_DTE = 7
 MAX_DTE = 360
