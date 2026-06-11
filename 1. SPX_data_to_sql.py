@@ -25,6 +25,7 @@ Before running:
 """
 
 import os
+import csv
 import pandas as pd
 import numpy as np
 
@@ -37,9 +38,9 @@ from sqlalchemy.dialects.mysql import DOUBLE
 # 1. Settings
 # ---------------------------------------------------------------------
 
-CONNECTION_STRING = "mysql+pymysql://root:PASSWORD@localhost/DATABASE_NAME" # Change this to your actual connection string
+CONNECTION_STRING = "mysql+pymysql://root:PASSWORD!@localhost/spx_data"
 
-ROOT_FOLDER = r"C:\Your\Path\Here\optiondx_spx" # Change this to your actual folder path containing the .txt files
+ROOT_FOLDER = r"C:\Your\Path\Here\optiondx_spx"
 TABLE_NAME = "spx_options_eod_clean"
 
 CHUNKSIZE = 100_000
@@ -85,7 +86,6 @@ COLUMNS = [
     "STRIKE_DISTANCE_PCT",
 ]
 
-
 DATE_COLUMNS = ["QUOTE_DATE", "EXPIRE_DATE"]
 DATETIME_COLUMNS = ["QUOTE_READTIME"]
 
@@ -124,7 +124,6 @@ FLOAT_COLUMNS = [
 ]
 
 STRING_COLUMNS = ["C_SIZE", "P_SIZE"]
-
 
 SQL_DTYPE_MAP = {
     "QUOTE_UNIXTIME": BigInteger(),
@@ -166,7 +165,6 @@ SQL_DTYPE_MAP = {
     "STRIKE_DISTANCE_PCT": DOUBLE(),
 }
 
-
 engine = create_engine(CONNECTION_STRING)
 
 
@@ -175,46 +173,85 @@ engine = create_engine(CONNECTION_STRING)
 # ---------------------------------------------------------------------
 
 def clean_string_series(s: pd.Series) -> pd.Series:
-    return (
-        s.astype(str)
-         .str.strip()
-         .replace(
-             {
-                 "": np.nan,
-                 "nan": np.nan,
-                 "NaN": np.nan,
-                 "None": np.nan,
-                 "NULL": np.nan,
-                 "null": np.nan,
-             }
-         )
+    """
+    Clean text values and keep missing values as NaN.
+    """
+
+    s = s.astype("string").str.strip()
+
+    s = s.replace(
+        {
+            "": np.nan,
+            "nan": np.nan,
+            "NaN": np.nan,
+            "None": np.nan,
+            "NULL": np.nan,
+            "null": np.nan,
+            "<NA>": np.nan,
+        }
     )
+
+    return s
 
 
 def to_numeric_clean(s: pd.Series) -> pd.Series:
+    """
+    Convert text to numeric.
+    Handles blanks, commas, and scientific notation.
+    """
+
     s = clean_string_series(s)
-    s = s.str.replace(",", "", regex=False)
+    s = s.astype("string").str.replace(",", "", regex=False)
     return pd.to_numeric(s, errors="coerce")
 
 
 def to_integer_clean(s: pd.Series) -> pd.Series:
+    """
+    Convert text to nullable integer.
+    Missing values remain missing.
+    """
+
     numeric = to_numeric_clean(s)
     return numeric.round().astype("Int64")
 
 
 def to_date_clean(s: pd.Series) -> pd.Series:
+    """
+    Convert text to date.
+    """
+
     s = clean_string_series(s)
     return pd.to_datetime(s, errors="coerce").dt.date
 
 
 def to_datetime_clean(s: pd.Series) -> pd.Series:
+    """
+    Convert text to datetime.
+    """
+
     s = clean_string_series(s)
     return pd.to_datetime(s, errors="coerce")
 
 
 def clean_chunk(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Clean one imported chunk.
+    """
+
     df = df.copy()
+
+    if len(df.columns) != len(COLUMNS):
+        raise ValueError(
+            f"Column mismatch after reading: "
+            f"{len(df.columns)} columns found, expected {len(COLUMNS)}"
+        )
+
     df.columns = COLUMNS
+
+    # Remove possible repeated header rows inside a file.
+    df = df[
+        clean_string_series(df["QUOTE_UNIXTIME"]).str.upper() != "QUOTE_UNIXTIME"
+    ].copy()
 
     for col in DATE_COLUMNS:
         df[col] = to_date_clean(df[col])
@@ -240,11 +277,9 @@ def clean_chunk(df: pd.DataFrame) -> pd.DataFrame:
 
 def find_txt_files_by_folder(root_folder: str) -> dict[str, list[str]]:
     """
-    Return a dictionary:
-        folder_path -> list of txt files inside that folder
-
-    This allows clean progress printing per folder/year.
+    Find all .txt files in the root folder and its subfolders.
     """
+
     files_by_folder = {}
 
     for folder, _, files in os.walk(root_folder):
@@ -262,15 +297,70 @@ def find_txt_files_by_folder(root_folder: str) -> dict[str, list[str]]:
 
 
 # ---------------------------------------------------------------------
-# 5. SQL helpers
+# 5. Delimiter helper
 # ---------------------------------------------------------------------
 
-def drop_output_table():
+def detect_delimiter_from_data(file_path: str) -> str:
+    """
+    Detect the delimiter using data rows, not the header row.
+
+    This matters because some OptionDX files have unusual header formatting,
+    while the actual data rows are still separated normally.
+    """
+
+    data_lines = []
+
+    with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+        # Skip the first line because it is the header.
+        next(f, None)
+
+        for line in f:
+            line = line.strip()
+            if line:
+                data_lines.append(line)
+
+            if len(data_lines) >= 20:
+                break
+
+    sample = "\n".join(data_lines)
+
+    if not sample:
+        return ","
+
+    try:
+        dialect = csv.Sniffer().sniff(sample, delimiters=[",", "\t", ";", "|"])
+        return dialect.delimiter
+    except Exception:
+        first_data_line = data_lines[0] if data_lines else ""
+
+        counts = {
+            ",": first_data_line.count(","),
+            "\t": first_data_line.count("\t"),
+            ";": first_data_line.count(";"),
+            "|": first_data_line.count("|"),
+        }
+
+        return max(counts, key=counts.get)
+
+
+# ---------------------------------------------------------------------
+# 6. SQL helpers
+# ---------------------------------------------------------------------
+
+def drop_output_table() -> None:
+    """
+    Drop the output table so the import starts from a clean table.
+    """
+
     with engine.begin() as conn:
         conn.execute(text(f"DROP TABLE IF EXISTS {TABLE_NAME};"))
 
 
-def add_indexes():
+def add_indexes() -> None:
+    """
+    Add indexes for faster queries.
+    """
+
     index_statements = [
         f"CREATE INDEX idx_quote_date ON {TABLE_NAME} (QUOTE_DATE);",
         f"CREATE INDEX idx_expire_date ON {TABLE_NAME} (EXPIRE_DATE);",
@@ -283,37 +373,44 @@ def add_indexes():
         for stmt in index_statements:
             try:
                 conn.execute(text(stmt))
-            except Exception as e:
+            except Exception as error:
                 print(f"Could not create index: {stmt}")
-                print(f"Reason: {e}")
+                print(f"Reason: {error}")
 
 
 # ---------------------------------------------------------------------
-# 6. Import one file
+# 7. Import one file
 # ---------------------------------------------------------------------
 
 def import_one_file(file_path: str, first_write: bool) -> tuple[bool, int]:
+    """
+    Read one txt file, skip its header row, assign the expected column names,
+    clean the data, and insert it into MySQL.
+    """
+
     file_rows = 0
+    delimiter = detect_delimiter_from_data(file_path)
 
     reader = pd.read_csv(
         file_path,
-        sep=",",
-        header=0,
+        sep=delimiter,
+        header=None,
+        skiprows=1,
         names=COLUMNS,
-        dtype=str,
+        dtype="string",
         chunksize=CHUNKSIZE,
         encoding="utf-8",
         encoding_errors="ignore",
         skipinitialspace=True,
+        quotechar='"',
+        on_bad_lines="skip",
         low_memory=False,
     )
 
     for chunk in reader:
-        if len(chunk.columns) != len(COLUMNS):
-            raise ValueError(
-                f"Column mismatch in {file_path}: "
-                f"{len(chunk.columns)} columns found, expected {len(COLUMNS)}"
-            )
+        # In case a file has an extra trailing empty column, remove it.
+        if len(chunk.columns) > len(COLUMNS):
+            chunk = chunk.iloc[:, :len(COLUMNS)].copy()
 
         cleaned = clean_chunk(chunk)
 
@@ -336,10 +433,14 @@ def import_one_file(file_path: str, first_write: bool) -> tuple[bool, int]:
 
 
 # ---------------------------------------------------------------------
-# 7. Final check
+# 8. Final check
 # ---------------------------------------------------------------------
 
-def final_check():
+def final_check() -> None:
+    """
+    Print compact table checks.
+    """
+
     row_count = pd.read_sql(
         f"SELECT COUNT(*) AS n_rows FROM {TABLE_NAME};",
         engine,
@@ -356,17 +457,34 @@ def final_check():
         engine,
     )
 
+    dtype_check = pd.read_sql(
+        f"""
+        SELECT
+            COLUMN_NAME,
+            DATA_TYPE
+        FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_SCHEMA = DATABASE()
+          AND TABLE_NAME = '{TABLE_NAME}'
+        ORDER BY ORDINAL_POSITION;
+        """,
+        engine,
+    )
+
     print("\nFinal table check")
     print("-----------------")
     print(row_count.to_string(index=False))
     print(date_check.to_string(index=False))
 
+    print("\nSQL column types")
+    print("----------------")
+    print(dtype_check.to_string(index=False))
+
 
 # ---------------------------------------------------------------------
-# 8. Main
+# 9. Main
 # ---------------------------------------------------------------------
 
-def main():
+def main() -> None:
     files_by_folder = find_txt_files_by_folder(ROOT_FOLDER)
 
     total_files = sum(len(files) for files in files_by_folder.values())
@@ -382,6 +500,8 @@ def main():
 
     first_write = True
     total_inserted = 0
+
+    failed_files = []
 
     for folder, files in files_by_folder.items():
         folder_inserted = 0
@@ -401,9 +521,10 @@ def main():
                     f"total inserted so far: {total_inserted:,}"
                 )
 
-            except Exception as e:
+            except Exception as error:
+                failed_files.append(file_path)
                 print(f"ERROR in file: {file_path}")
-                print(e)
+                print(error)
 
         print(
             f"Folder finished: {folder} | "
@@ -413,6 +534,14 @@ def main():
 
     add_indexes()
     final_check()
+
+    if failed_files:
+        print("\nFiles that failed")
+        print("-----------------")
+        for file_path in failed_files:
+            print(file_path)
+    else:
+        print("\nNo failed files.")
 
     print("\nImport complete.")
 
