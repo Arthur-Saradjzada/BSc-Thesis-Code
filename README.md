@@ -1,6 +1,6 @@
 # BSc-Thesis-Code
 
-## 1. Import OptionDX SPX data into MySQL
+## 1. Import SPX data into MySQL
 
 File: `optiondx_data_to_sql.py`
 
@@ -269,7 +269,7 @@ This CSV file is used as input for later programs. #WILL PROBABLY BE ADJUSTED TO
 
 The script also shows a 3D plot of the implied volatility surface for the selected `PLOT_DAY`.
 
-## 4. Import OptionDX VIX data into MySQL
+## 4. Import VIX data into MySQL
 
 File: `vix_data_to_sql.py`
 
