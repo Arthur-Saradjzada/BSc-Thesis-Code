@@ -1,6 +1,6 @@
 # BSc-Thesis-Code
 
-## 1. Import SPX data into MySQL
+## 1. Dataset
 
 File: `optiondx_data_to_sql.py`
 
