@@ -87,15 +87,13 @@ for j in range(5):
     print(f"beta_{j+1} correlation (true vs filtered): {round(c, 4)}")
 
 ###############OUTPUT################
-fig, axes = plt.subplots(5, 1, figsize=(10, 12), sharex=True)
 for j in range(5):
-    axes[j].plot(beta_true[:, j],     lw=1.0,            label="true beta")
-    axes[j].plot(beta_filtered[:, j], lw=0.8, ls="--",   label="filtered beta (hat)")
-    axes[j].set_title(f"beta_{j+1}", fontsize=9)
-    axes[j].legend(fontsize=7, loc="upper right")
-axes[-1].set_xlabel("day")
-plt.tight_layout()
-plt.show()
+    plt.figure()
+    plt.plot(beta_true[:, j], color="black", lw=1.5, label="true beta")
+    plt.plot(beta_filtered[:, j], color="red", ls=":", lw=1.5, label="filtered beta")
+    plt.title("beta " + str(j + 1))
+    plt.legend()
+    plt.show()
 
 print(M)
 print(M.shape)
