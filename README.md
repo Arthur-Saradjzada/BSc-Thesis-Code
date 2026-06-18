@@ -8,14 +8,13 @@ The raw data should be downloaded manually from:
 
 https://www.optionsdx.com/
 
-Use the following download settings:
+Use the dataset:
 
 - Underlying: SPX
 - Data type: Option Chains
 - Quote Frequency: End of Day
 - Years: 2010 to 2023
 - File format: `.txt`
-
 
 Each year folder should contain the monthly `.txt` files downloaded from OptionDX (do not forget to unzip the folders before running).
 
