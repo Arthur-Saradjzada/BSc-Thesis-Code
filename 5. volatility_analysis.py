@@ -1,6 +1,4 @@
 """
-volatility_timeseries_and_slopes.py
-
 Purpose:
 Create descriptive time-series plots from the SPX implied-volatility
 surface panel.
