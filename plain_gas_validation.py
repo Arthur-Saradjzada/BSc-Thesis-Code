@@ -35,13 +35,10 @@ beta_history = []
 for t in range(T): 
 
     eps = np.random.standard_normal(24)
-
     y = M @ beta + eps 
     Y_history.append(y)
     beta_history.append(beta)
-
     xi = A @ np.linalg.inv(M.T @ H_inv @ M) @ M.T @ H_inv @ eps
-
     beta = (np.eye(5) - B) @ beta_bar + B @ beta + xi
     
 Y         = np.array(Y_history)
@@ -58,13 +55,9 @@ def gas_filter(a, b, Y):
 
     for t in range(len(Y)):
         eps = Y[t] - M @ beta
-
         loglik += -0.5 * (np.log(np.linalg.det(2 * np.pi * H)) + eps @ (H_inv @ eps))
-
         beta_filtered.append(beta)
-        
         xi = A @ np.linalg.inv(M.T @ H_inv @ M) @ M.T @ H_inv @ eps
-
         beta = (np.eye(5) - B) @ beta_bar + B @ beta + xi
 
     return loglik, np.array(beta_filtered)
@@ -87,14 +80,6 @@ for j in range(5):
     print(f"beta_{j+1} correlation (true vs filtered): {round(c, 4)}")
 
 ###############OUTPUT################
-for j in range(5):
-    plt.figure()
-    plt.plot(beta_true[:, j], color="black", lw=1.5, label="true beta")
-    plt.plot(beta_filtered[:, j], color="red", ls=":", lw=1.5, label="filtered beta")
-    plt.title("beta " + str(j + 1))
-    plt.legend()
-    plt.show()
-
 print(M)
 print(M.shape)
 
@@ -105,4 +90,12 @@ print("day 1 surface (first 5 buckets):", Y[0][:5])
 print("true a =", true_a, "  estimated a =", round(a_hat, 4))
 print("true b =", true_b, "  estimated b =", round(b_hat, 4))
 print("converged:", result.success)
+
+for j in range(5):
+    plt.figure()
+    plt.plot(beta_true[:, j], color="black", lw=1.5, label="true beta")
+    plt.plot(beta_filtered[:, j], color="red", ls=":", lw=1.5, label="filtered beta")
+    plt.title("beta " + str(j + 1))
+    plt.legend()
+    plt.show()
 
