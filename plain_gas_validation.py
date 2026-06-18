@@ -51,16 +51,17 @@ def gas_filter(a, b, Y):
 
     beta   = np.zeros(5)   
     loglik = 0.0
-    beta_filtered = []      
+    beta_hat = []      
 
     for t in range(len(Y)):
         eps = Y[t] - M @ beta
+
         loglik += -0.5 * (np.log(np.linalg.det(2 * np.pi * H)) + eps @ (H_inv @ eps))
-        beta_filtered.append(beta)
+        beta_hat.append(beta)
         xi = A @ np.linalg.inv(M.T @ H_inv @ M) @ M.T @ H_inv @ eps
         beta = (np.eye(5) - B) @ beta_bar + B @ beta + xi
 
-    return loglik, np.array(beta_filtered)
+    return loglik, np.array(beta_hat)
 
 def neg_loglik(params):
     a, b = params
@@ -74,10 +75,10 @@ result = minimize(neg_loglik, start,
 
 a_hat, b_hat = result.x
 
-_, beta_filtered = gas_filter(a_hat, b_hat, Y)
+_, beta_hat = gas_filter(a_hat, b_hat, Y)
 for j in range(5):
-    c = np.corrcoef(beta_true[:, j], beta_filtered[:, j])[0, 1]
-    print(f"beta_{j+1} correlation (true vs filtered): {round(c, 4)}")
+    c = np.corrcoef(beta_true[:, j], beta_hat[:, j])[0, 1]
+    print(f"beta_{j+1} correlation (beta vs beta hat): {round(c, 4)}")
 
 ###############OUTPUT################
 print(M)
@@ -94,7 +95,7 @@ print("converged:", result.success)
 for j in range(5):
     plt.figure()
     plt.plot(beta_true[:, j], color="black", lw=1.5, label="true beta")
-    plt.plot(beta_filtered[:, j], color="red", ls=":", lw=1.5, label="filtered beta")
+    plt.plot(beta_hat[:, j], color="red", ls=":", lw=1.5, label="beta hat")
     plt.title("beta " + str(j + 1))
     plt.legend()
     plt.show()
